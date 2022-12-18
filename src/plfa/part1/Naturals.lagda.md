@@ -78,7 +78,7 @@ successor of two; and so on.
 Write out `7` in longhand.
 
 ```agda
--- Your code goes here
+seven = suc (suc (suc (suc (suc (suc (suc zero))))))
 ```
 
 You will need to give both a type signature and definition for the
@@ -430,7 +430,21 @@ other word for evidence, which we will use interchangeably, is _proof_.
 Compute `3 + 4`, writing out your reasoning as a chain of equations, using the equations for `+`.
 
 ```agda
--- Your code goes here
++-example : 3 + 4 ≡ 7
++-example =
+  begin
+    3 + 4
+  ≡⟨⟩
+    suc (2 + 4)
+  ≡⟨⟩
+    suc (suc (1 + 4))
+  ≡⟨⟩
+    suc (suc (suc (0 + 4)))
+  ≡⟨⟩
+    suc (suc (suc 4))
+  ≡⟨⟩
+    7
+  ∎
 ```
 
 
@@ -492,7 +506,21 @@ Compute `3 * 4`, writing out your reasoning as a chain of equations, using the e
 (You do not need to step through the evaluation of `+`.)
 
 ```agda
--- Your code goes here
+*-example : 3 * 4 ≡ 12
+*-example =
+  begin
+    3 * 4
+  ≡⟨⟩
+    4 + (2 * 4)
+  ≡⟨⟩
+    4 + (4 + (1 * 4))
+  ≡⟨⟩
+    4 + (4 + (4 + (0 * 4)))
+  ≡⟨⟩
+    4 + (4 + (4 + 0))
+  ≡⟨⟩
+    12
+  ∎
 ```
 
 
@@ -506,7 +534,12 @@ Define exponentiation, which is given by the following equations:
 Check that `3 ^ 4` is `81`.
 
 ```agda
--- Your code goes here
+_^_ : ℕ → ℕ → ℕ
+m ^ zero = 1
+m ^ (suc n) = m * (m ^ n)
+
+^-example : 3 ^ 4 ≡ 81
+^-example = refl
 ```
 
 
@@ -589,7 +622,33 @@ Section [Logical Connectives](/Decidable/#logical-connectives).
 Compute `5 ∸ 3` and `3 ∸ 5`, writing out your reasoning as a chain of equations.
 
 ```agda
--- Your code goes here
+∸-example₁ : 5 ∸ 3 ≡ 2
+∸-example₁ =
+  begin
+    5 ∸ 3
+  ≡⟨⟩
+    4 ∸ 2
+  ≡⟨⟩
+    3 ∸ 1
+  ≡⟨⟩
+    2 ∸ 0
+  ≡⟨⟩
+    2
+  ∎
+
+∸-example₂ : 3 ∸ 5 ≡ 0
+∸-example₂ =
+  begin
+    3 ∸ 5
+  ≡⟨⟩
+    2 ∸ 4
+  ≡⟨⟩
+    1 ∸ 3
+  ≡⟨⟩
+    0 ∸ 2
+  ≡⟨⟩
+    0
+  ∎
 ```
 
 
@@ -936,7 +995,48 @@ represents a positive natural, and represent zero by `⟨⟩ O`.
 Confirm that these both give the correct answer for zero through four.
 
 ```agda
--- Your code goes here
+inc : Bin → Bin
+inc ⟨⟩ = ⟨⟩ I
+inc (b O) = b I 
+inc (b I) = (inc b) O
+
+inc-example₁ : inc (⟨⟩ I O I I) ≡ ⟨⟩ I I O O
+inc-example₁ = refl
+
+inc-example₂ : inc (⟨⟩ I I I) ≡ ⟨⟩ I O O O
+inc-example₂ = refl
+
+to : ℕ → Bin
+to 0 = ⟨⟩
+to (suc n) = inc (to n)
+
+to-example₀ : to 0 ≡ ⟨⟩
+to-example₀ = refl
+to-example₁ : to 1 ≡ ⟨⟩ I
+to-example₁ = refl
+to-example₂ : to 2 ≡ ⟨⟩ I O
+to-example₂ = refl
+to-example₃ : to 3 ≡ ⟨⟩ I I
+to-example₃ = refl
+to-example₄ : to 4 ≡ ⟨⟩ I O O
+to-example₄ = refl
+
+from : Bin → ℕ
+from ⟨⟩ = 0
+from (n O) = 2 * (from n)
+from (n I) = 1 + 2 * (from n)
+
+
+from-example₀ : from ⟨⟩ ≡ 0
+from-example₀ = refl
+from-example₁ : from (⟨⟩ I) ≡ 1
+from-example₁ = refl
+from-example₂ : from (⟨⟩ I O) ≡ 2
+from-example₂ = refl
+from-example₃ : from (⟨⟩ I I) ≡ 3
+from-example₃ = refl
+from-example₄ : from (⟨⟩ I O O) ≡ 4
+from-example₄ = refl
 ```
 
 
