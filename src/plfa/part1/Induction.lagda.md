@@ -874,7 +874,17 @@ just apply the previous results which show addition
 is associative and commutative.
 
 ```agda
--- Your code goes here
++-swap : ∀ (m n p : ℕ) → m + (n + p) ≡ n + (m + p)
++-swap m n p =
+  begin
+    m + (n + p)
+  ≡⟨ sym (+-assoc m n p) ⟩
+    (m + n) + p
+  ≡⟨ cong (_+ p) (+-comm m n) ⟩
+    (n + m) + p
+  ≡⟨ +-assoc n m p ⟩
+    n + (m + p)
+  ∎
 ```
 
 
@@ -887,9 +897,30 @@ Show multiplication distributes over addition, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+*-distrib-+ : ∀ (m n p : ℕ) → (m + n) * p ≡ m * p + n * p
+*-distrib-+ zero n p =
+  begin
+    (zero + n) * p
+  ≡⟨⟩
+    n * p
+  ≡⟨⟩
+    zero * n + n * p
+  ∎
+*-distrib-+ (suc m) n p =
+  begin
+    (suc m + n) * p
+  ≡⟨⟩
+    suc (m + n) * p
+  ≡⟨⟩
+    p + (m + n) * p
+  ≡⟨ cong (p +_) (*-distrib-+ m n p) ⟩
+    p + (m * p + n * p)
+  ≡⟨ sym (+-assoc p (m * p) (n * p)) ⟩
+    p + m * p + n * p
+  ≡⟨⟩
+    (suc m) * p + n * p
+  ∎
 ```
-
 
 #### Exercise `*-assoc` (recommended) {#times-assoc}
 
@@ -900,7 +931,21 @@ Show multiplication is associative, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+*-assoc : ∀ (m n p : ℕ) → (m * n) * p ≡ m * (n * p)
+*-assoc zero n p = refl
+-- *-assoc (suc m) n p rewrite *-distrib-+ n (m * n) p | cong (n * p +_) (*-assoc m n p) = refl
+*-assoc (suc m) n p =
+  begin
+    (suc m * n) * p
+  ≡⟨⟩
+    (n + m * n) * p
+  ≡⟨ *-distrib-+ n (m * n) p ⟩
+    n * p + (m * n) * p
+  ≡⟨ cong (n * p +_) (*-assoc m n p) ⟩
+    n * p + m * (n * p)
+  ≡⟨⟩
+    suc m * (n * p)
+  ∎
 ```
 
 
@@ -914,7 +959,83 @@ for all naturals `m` and `n`.  As with commutativity of addition,
 you will need to formulate and prove suitable lemmas.
 
 ```agda
--- Your code goes here
+*-zeroʳ : ∀ (m : ℕ) → m * zero ≡ zero
+*-zeroʳ zero = refl
+*-zeroʳ (suc m) =
+  begin
+    (suc m) * zero
+  ≡⟨⟩
+    zero + m * zero
+  ≡⟨⟩
+    m * zero
+  ≡⟨ *-zeroʳ m ⟩
+    zero
+  ∎
+
+*-identityʳ : ∀ (m : ℕ) → m * (suc zero) ≡ m
+*-identityʳ zero = refl
+*-identityʳ (suc m) =
+  begin
+    (suc m) * (suc zero)
+  ≡⟨⟩
+    (suc zero) + m * (suc zero)
+  ≡⟨ cong ((suc zero) +_) (*-identityʳ m) ⟩
+    (suc zero) + m
+  ≡⟨⟩
+    suc (zero + m)
+  ≡⟨⟩
+    suc m
+  ∎
+
+*-suc : ∀ (m n : ℕ) → m + m * n ≡ m * suc n
+*-suc zero n =
+  begin
+    zero + zero * n
+  ≡⟨⟩
+    zero * n
+  ≡⟨⟩
+    zero * (suc n)
+  ∎
+*-suc (suc m) n =
+  begin
+    (suc m) + (suc m) * n
+  ≡⟨⟩
+    (suc m) + (n + m * n)
+  ≡⟨ sym (+-assoc (suc m) n (m * n)) ⟩
+    (suc m) + n + m * n
+  ≡⟨⟩
+    suc (m + n) + m * n
+  ≡⟨ cong (_+ m * n) (cong suc (+-comm m n)) ⟩
+    suc (n + m) + m * n
+  ≡⟨⟩
+    suc n + m + m * n
+  ≡⟨ +-assoc (suc n) m (m * n) ⟩
+    suc n + (m + m * n)
+  ≡⟨ cong ((suc n) +_) (*-suc m n) ⟩
+    suc n + m * suc n
+  ≡⟨⟩
+    suc m * suc n
+  ∎
+
+*-comm : ∀ (m n : ℕ) → m * n ≡ n * m
+*-comm zero n =
+  begin
+    zero * n
+  ≡⟨⟩
+    zero
+  ≡⟨ sym (*-zeroʳ n) ⟩
+    n * zero
+  ∎
+*-comm (suc m) n =
+  begin
+    suc m * n
+  ≡⟨⟩
+    n + m * n
+  ≡⟨ cong (n +_) (*-comm m n) ⟩
+    n + n * m
+  ≡⟨ *-suc n m ⟩
+    n * suc m
+  ∎
 ```
 
 
