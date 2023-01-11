@@ -1048,7 +1048,9 @@ Show
 for all naturals `n`. Did your proof require induction?
 
 ```agda
--- Your code goes here
+0∸n≡0 : ∀ (n : ℕ) → zero ∸ n ≡ zero
+0∸n≡0 zero = refl
+0∸n≡0 (suc n) = refl
 ```
 
 
@@ -1061,7 +1063,37 @@ Show that monus associates with addition, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+∸-+-assoc : ∀ (m n p : ℕ) → m ∸ n ∸ p ≡ m ∸ (n + p)
+∸-+-assoc zero n p =
+  begin
+    zero ∸ n ∸ p
+  ≡⟨ cong (_∸ p) (0∸n≡0 n) ⟩
+    zero ∸ p
+  ≡⟨ 0∸n≡0 p ⟩
+    zero
+  ≡⟨ sym (0∸n≡0 (n + p)) ⟩
+    zero ∸ (n + p)
+  ∎
+∸-+-assoc (suc m) zero p =
+  begin
+    (suc m) ∸ zero ∸ p
+  ≡⟨⟩
+    (suc m) ∸ p
+  ≡⟨⟩
+    (suc m) ∸ (zero + p)
+  ∎
+∸-+-assoc (suc m) (suc n) p =
+  begin
+    (suc m) ∸ (suc n) ∸ p
+  ≡⟨⟩
+    m ∸ n ∸ p
+  ≡⟨ ∸-+-assoc m n p ⟩
+    m ∸ (n + p)
+  ≡⟨⟩
+    (suc m) ∸ (suc (n + p))
+  ≡⟨⟩
+    (suc m) ∸ ((suc n) + p)
+  ∎
 ```
 
 
@@ -1076,13 +1108,125 @@ Show the following three laws
 for all `m`, `n`, and `p`.
 
 ```
--- Your code goes here
+*-identityˡ : ∀ (m : ℕ) → 1 * m ≡ m
+*-identityˡ m rewrite *-comm 1 m | *-identityʳ m = refl
+
+^-0 : ∀ (n : ℕ) → n ^ 0 ≡ 1
+^-0 n = refl
+
+^-distribˡ-+-* : ∀ (m n p : ℕ) → m ^ (n + p) ≡ (m ^ n) * (m ^ p)
+^-distribˡ-+-* m zero p =
+  begin
+    m ^ (zero + p)
+  ≡⟨⟩
+    m ^ p
+  ≡⟨ sym (*-identityˡ (m ^ p) ) ⟩
+    1 * (m ^ p)
+  ≡⟨ cong (_* (m ^ p)) (sym (^-0 m)) ⟩
+    (m ^ zero) * (m ^ p)
+  ∎
+^-distribˡ-+-* m (suc n) p =
+  begin
+    m ^ ((suc n) + p)
+  ≡⟨⟩
+    m ^ (suc (n + p))
+  ≡⟨⟩
+    m * (m ^ (n + p))
+  ≡⟨ cong (m *_) (^-distribˡ-+-* m n p) ⟩
+    m * ((m ^ n) * (m ^ p))
+  ≡⟨ sym (*-assoc m (m ^ n) (m ^ p)) ⟩
+    m * (m ^ n) * (m ^ p)
+  ≡⟨⟩
+    (m ^ (suc n)) * (m ^ p)
+  ∎
+
+^-distribʳ-* : ∀ (m n p : ℕ) → (m * n) ^ p ≡ (m ^ p) * (n ^ p)
+^-distribʳ-* m n zero =
+  begin
+    (m * n) ^ zero
+  ≡⟨⟩
+    1
+  ≡⟨⟩
+    1 * 1
+  ≡⟨⟩
+    (m ^ zero) * 1
+  ≡⟨⟩
+    (m ^ zero) * (n ^ zero)
+  ∎
+^-distribʳ-* m n (suc p) =
+  begin
+    (m * n) ^ (suc p)
+  ≡⟨⟩
+    (m * n) * ((m * n) ^ p)
+  ≡⟨ cong ((m * n) *_) (^-distribʳ-* m n p) ⟩
+    (m * n) * ((m ^ p) * (n ^ p))
+  ≡⟨ *-assoc m n ((m ^ p) * (n ^ p)) ⟩
+    m * (n * ((m ^ p) * (n ^ p)))
+  ≡⟨ cong (m *_) (sym (*-assoc n (m ^ p) (n ^ p))) ⟩
+    m * (n * (m ^ p) * (n ^ p))
+  ≡⟨ cong (m *_) (cong (_* (n ^ p)) (*-comm n (m ^ p))) ⟩
+    m * ((m ^ p) * n * (n ^ p))
+  ≡⟨ cong (m *_) (*-assoc (m ^ p) n (n ^ p)) ⟩
+    m * ((m ^ p) * (n * (n ^ p)))
+  ≡⟨ sym (*-assoc m (m ^ p) (n * (n ^ p))) ⟩
+    (m * (m ^ p)) * (n * (n ^ p))
+  ≡⟨⟩
+    (m ^ (suc p)) * (n * (n ^ p))
+  ≡⟨⟩
+    (m ^ (suc p)) * (n ^ (suc p))
+  ∎
+
+1-^ : ∀ (n : ℕ) → 1 ^ n ≡ 1
+1-^ zero =
+  begin
+    1 ^ zero
+  ≡⟨⟩
+    1
+  ∎
+1-^ (suc n) =
+  begin
+    1 ^ (suc n)
+  ≡⟨⟩
+    1 * (1 ^ n)
+  ≡⟨ *-identityˡ (1 ^ n) ⟩
+    1 ^ n
+  ≡⟨ 1-^ n ⟩
+    1
+  ∎
+
+^-*-assoc : ∀ (m n p : ℕ) → (m ^ n) ^ p ≡ m ^ (n * p)
+^-*-assoc m zero p =
+  begin
+    (m ^ zero) ^ p
+  ≡⟨⟩
+    1 ^ p
+  ≡⟨ 1-^ p ⟩
+    1
+  ≡⟨⟩
+    m ^ zero
+  ≡⟨⟩
+    m ^ (zero * p)
+  ∎
+^-*-assoc m (suc n) p =   -- m ^ ((suc n) * p)
+  begin
+    (m ^ (suc n)) ^ p
+  ≡⟨⟩
+    (m * (m ^ n)) ^ p
+  ≡⟨ ^-distribʳ-* m (m ^ n) p ⟩
+    (m ^ p) * ((m ^ n) ^ p)
+  ≡⟨ cong ((m ^ p) *_) (^-*-assoc m n p) ⟩
+    (m ^ p) * (m ^ (n * p))
+  ≡⟨ sym (^-distribˡ-+-* m p (n * p)) ⟩
+    (m ^ (p + n * p))
+  ≡⟨⟩
+    (m ^ ((suc n) * p))
+  ∎
 ```
 
 
 #### Exercise `Bin-laws` (stretch) {#Bin-laws}
 
-Recall that
+*Recall* that
 Exercise [Bin](/Naturals/#Bin)
 defines a datatype `Bin` of bitstrings representing natural numbers,
 and asks you to define functions
@@ -1101,7 +1245,79 @@ over bitstrings:
 For each law: if it holds, prove; if not, give a counterexample.
 
 ```agda
--- Your code goes here
+data Bin : Set where
+  ⟨⟩ : Bin
+  _O : Bin → Bin
+  _I : Bin → Bin
+
+inc : Bin → Bin
+inc ⟨⟩ = ⟨⟩ I
+inc (b O) = b I
+inc (b I) = (inc b) O
+
+to : ℕ → Bin
+to 0 = ⟨⟩
+to (suc n) = inc (to n)
+
+from : Bin → ℕ
+from ⟨⟩ = 0
+from (n O) = 2 * (from n)
+from (n I) = 1 + 2 * (from n)
+
+from-inc : ∀ (b : Bin) → from (inc b) ≡ suc (from b)
+from-inc ⟨⟩ = refl
+from-inc (b O) =
+  begin
+    from (inc (b O))
+  ≡⟨⟩
+    from (b I)
+  ≡⟨⟩
+    1 + 2 * (from b)
+  ≡⟨⟩
+    1 + from (b O)
+  ≡⟨⟩
+    suc (from (b O))
+  ∎
+from-inc (b I) =
+  begin
+    from (inc (b I))
+  ≡⟨⟩
+    from ((inc b) O)
+  ≡⟨⟩
+    2 * (from (inc b))
+  ≡⟨ cong (2 *_) (from-inc b) ⟩
+    2 * (suc (from b))
+  ≡⟨⟩
+    2 * (1 + (from b))
+  ≡⟨ *-comm 2 (1 + (from b)) ⟩
+    (1 + (from b)) * 2
+  ≡⟨ *-distrib-+ 1 (from b) 2 ⟩
+    1 * 2 + (from b) * 2
+  ≡⟨⟩
+    2 + (from b) * 2
+  ≡⟨ cong (2 +_) (*-comm (from b) 2) ⟩
+    2 + 2 * (from b)
+  ≡⟨⟩
+    suc (suc (2 * from b))
+  ≡⟨⟩
+    suc (from (b I))
+  ∎
+
+-- to (from b) != b
+-- for example: ⟨⟩ I != ⟨⟩ O I
+
+from-to : ∀ (n : ℕ) → from (to n) ≡ n
+from-to zero = refl
+from-to (suc n) =
+  begin
+    from (to (suc n))
+  ≡⟨⟩
+    from (inc (to n))
+  ≡⟨ from-inc (to n) ⟩
+    suc (from (to n))
+  ≡⟨ cong suc (from-to n) ⟩
+    suc n
+  ∎
 ```
 
 
